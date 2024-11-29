@@ -1,8 +1,6 @@
 import flet as ft
 from gtts import gTTS
 import subprocess
-import os
-from io import BytesIO
 
 def text_to_voice(text, output, lang, volume, speed):
     output_mp3 = f"{output}.mp3"
@@ -35,7 +33,8 @@ def main(page: ft.Page):
             return
 
         # Generar el archivo de audio
-        output_file = text_to_voice(
+        global generated_file  # Guardamos la ruta del archivo generado
+        generated_file = text_to_voice(
             text=text_field.value,
             output="output_audio",
             lang=lang_dropdown.value,
@@ -43,7 +42,7 @@ def main(page: ft.Page):
             speed=speed_slider.value,
         )
 
-        result_label.value = f"Audio generado: {output_file}"
+        result_label.value = f"Audio generado: {generated_file}"
         result_label.visible = True
         play_button.visible = True
         save_button.visible = True
@@ -51,11 +50,17 @@ def main(page: ft.Page):
 
     # Función para reproducir el audio generado
     def play_audio(e):
-        subprocess.run(["ffplay", "-nodisp", "-autoexit", "output_audio.wav"])
+        if generated_file:
+            subprocess.run(["ffplay", "-nodisp", "-autoexit", generated_file])
 
     # Función para guardar el archivo de audio
     def save_audio(e):
-        file_picker.save_file("output_audio.wav")
+        if generated_file:
+            file_picker.save_file(file_name="output_audio.wav")
+
+    # Configuración del FilePicker
+    file_picker = ft.FilePicker(on_save=lambda e: page.snack_bar.open("Archivo guardado"))
+    page.overlay.append(file_picker)
 
     # Controles de entrada
     text_field = ft.TextField(label="Texto (máximo 200 caracteres)", max_length=200)
@@ -74,7 +79,7 @@ def main(page: ft.Page):
     # Botones y resultados
     generate_button = ft.ElevatedButton("Generar", on_click=generate_audio)
     play_button = ft.ElevatedButton("Reproducir", on_click=play_audio, visible=False)
-    save_button = ft.ElevatedButton("Guardar", on_click=save_audio, visible=False)
+    save_button = ft.ElevatedButton("Guardar", on_click=lambda e: file_picker.save_file(file_name="output_audio.wav"), visible=False)
     result_label = ft.Text(visible=False)
 
     # Layout
