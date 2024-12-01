@@ -63,15 +63,6 @@ def main(page: ft.Page):
         if generated_file:
             subprocess.run(["ffplay", "-nodisp", "-autoexit", generated_file])
 
-    # Función para manejar cambios en los sliders
-    def update_volume_label(e):
-        volume_label.value = f"Volumen: {round(volume_slider.value, 1)}"
-        page.update()
-
-    def update_speed_label(e):
-        speed_label.value = f"Velocidad: {round(speed_slider.value, 1)}"
-        page.update()
-
     # Configuración del FilePicker
     file_picker = ft.FilePicker(on_result=save_file_dialog_result)
     page.overlay.append(file_picker)
@@ -92,14 +83,14 @@ def main(page: ft.Page):
         min=0.5,
         max=2.0,
         value=1.0,
-        on_change=update_volume_label,
+        on_change=lambda e: volume_label.update(value=f"Volumen: {round(volume_slider.value, 1)}"),
     )
     speed_slider = ft.Slider(
         label="Velocidad",
         min=0.5,
         max=2.0,
         value=1.0,
-        on_change=update_speed_label,
+        on_change=lambda e: speed_label.update(value=f"Velocidad: {round(speed_slider.value, 1)}"),
     )
 
     volume_label = ft.Text(value="Volumen: 1.0")
