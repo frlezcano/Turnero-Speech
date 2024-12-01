@@ -2,7 +2,6 @@ import flet as ft
 from gtts import gTTS
 import subprocess
 
-
 def text_to_voice(text, output, lang, volume, speed):
     output_mp3 = f"{output}.mp3"
     output_wav = f"{output}.wav"
@@ -103,7 +102,6 @@ def main(page: ft.Page):
         on_change=update_speed_label,
     )
 
-    text_title = ft.Text("Turnero-Speech", size=28)
     volume_label = ft.Text(value="Volumen: 1.0")
     speed_label = ft.Text(value="Velocidad: 1.0")
 
@@ -119,31 +117,19 @@ def main(page: ft.Page):
 
     # Layout
     page.add(
-        ft.Row(
-            controls=[
-                ft.Container(
-                    image_src="images/Turnero-Speech-Background.jpg",
-                    expand=2,
-                    padding=ft.padding.all(40),
-                    content =ft.Column(
-                        alignment=ft.MainAxisAlignment.CENTER,
-                        controls=[
-                            text_title,
-                            text_field,
-                            lang_dropdown,
-                            ft.Row([volume_slider, volume_label]),
-                            ft.Row([speed_slider, speed_label]),
-                            generate_button,
-                            result_label,
-                            play_button,
-                            save_button,
-                        ]
-                    )
-
-                )
+        ft.Column(
+            [
+                text_field,
+                lang_dropdown,
+                ft.Row([volume_slider, volume_label]),
+                ft.Row([speed_slider, speed_label]),
+                generate_button,
+                result_label,
+                play_button,
+                save_button,
             ]
         )
     )
 
 
-ft.app(target=main, assets_dir="assets")
+ft.app(target=main)
