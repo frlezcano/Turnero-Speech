@@ -2,12 +2,6 @@ import flet as ft
 from gtts import gTTS
 import subprocess
 
-class Data:
-    def __init__(self) -> None:
-        self.counter = 0
-
-d = Data()
-
 def text_to_voice(text, output, lang, volume, speed, output_format):
     output_mp3 = f"{output}.mp3"
     output_wav = f"{output}.wav"
@@ -40,18 +34,6 @@ def main(page: ft.Page):
 
     generated_file = None  # Variable para guardar la ruta del archivo generado
 
-    # Función que muestra la snack_bar
-    def on_snack_bar(snack_bar_message, snack_bar_color):
-        page.snack_bar = ft.SnackBar(
-                            content=ft.Text(f"{snack_bar_message}"),
-                            bgcolor = snack_bar_color,
-                        )
-        # page.behavior= "FLOATING"
-        # page.snack_bar.padding = 20
-        page.snack_bar.open = True
-        d.counter += 15
-        page.update()
-
     # Función para manejar el evento del FilePicker
     def save_file_dialog_result(e: ft.FilePickerResultEvent):
         if e.path:  # Si se seleccionó una ruta válida
@@ -63,9 +45,12 @@ def main(page: ft.Page):
     # Función para generar el archivo de audio
     def generate_audio(e):
         nonlocal generated_file
-        if len(text_field.value) > 200 or len(text_field.value) == 0:
-            # Mensaje de error
-            on_snack_bar(f"Error --> El texto debe tener caracteres a traducir y no pueden ser más de 200", "#db9fa0")
+        if len(text_field.value) > 200:
+            page.dialog = ft.AlertDialog(
+                title=ft.Text("Error"),
+                content=ft.Text("El texto no puede exceder los 200 caracteres."),
+            )
+            page.dialog.open = True
             page.update()
             return
 
@@ -79,12 +64,8 @@ def main(page: ft.Page):
             output_format=format_dropdown.value,  # Formato de salida
         )
 
-        # Mensaje de éxito
-        on_snack_bar(f"Exito --> Tu archivo de audio {generated_file} fue generado correctamente", "#90d4bf")
-        page.snack_bar.open = True
-        d.counter += 1
-
-        generate_button.visible = False 
+        result_label.value = f"Audio generado: {generated_file}"
+        result_label.visible = True
         play_button.visible = True
         separador_label.visible = True
         save_button.visible = True
@@ -106,12 +87,14 @@ def main(page: ft.Page):
         page.update()
 
     def new_audio(e):
-        generate_button.visible = True
+        result_label.visible = False
         play_button.visible = False
         separador_label.visible = False
         save_button.visible = False
         new_button.visible = False
         page.update()
+
+
 
     # Configuración del FilePicker
     file_picker = ft.FilePicker(on_result=save_file_dialog_result)
@@ -167,6 +150,7 @@ def main(page: ft.Page):
         visible=False,
     )
     new_button = ft.ElevatedButton("Nuevo", on_click=new_audio, visible=False)
+    result_label = ft.Text(visible=False,color="#3c73ce")
 
     # Layout
     page.add(
@@ -200,14 +184,22 @@ def main(page: ft.Page):
                                 ft.Row(
                                     alignment=ft.MainAxisAlignment.CENTER,
                                     controls=[                                                                    
-                                        generate_button, 
+                                        generate_button,
+                                        ## separador_label,
+                                        play_button, 
+                                    ]
+                                ),
+                                ft.Row(
+                                    alignment=ft.MainAxisAlignment.CENTER,
+                                    controls=[  
+                                        result_label,
                                     ]
                                 ),
                                 ft.Row(
                                     alignment=ft.MainAxisAlignment.CENTER,
                                     controls=[
-                                        play_button,
                                         save_button,
+                                        ## separador_label,
                                         new_button,
                                     ]
                                 )

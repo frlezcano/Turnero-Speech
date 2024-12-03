@@ -2,12 +2,6 @@ import flet as ft
 from gtts import gTTS
 import subprocess
 
-class Data:
-    def __init__(self) -> None:
-        self.counter = 0
-
-d = Data()
-
 def text_to_voice(text, output, lang, volume, speed, output_format):
     output_mp3 = f"{output}.mp3"
     output_wav = f"{output}.wav"
@@ -36,21 +30,9 @@ def main(page: ft.Page):
     page.title = "Generador de Audio para Turnero"
     page.window.width = 850
     page.window.height = 510
-    ## page.window.resizable = False
+    page.window.resizable = False
 
     generated_file = None  # Variable para guardar la ruta del archivo generado
-
-    # Función que muestra la snack_bar
-    def on_snack_bar(snack_bar_message, snack_bar_color):
-        page.snack_bar = ft.SnackBar(
-                            content=ft.Text(f"{snack_bar_message}"),
-                            bgcolor = snack_bar_color,
-                        )
-        # page.behavior= "FLOATING"
-        # page.snack_bar.padding = 20
-        page.snack_bar.open = True
-        d.counter += 15
-        page.update()
 
     # Función para manejar el evento del FilePicker
     def save_file_dialog_result(e: ft.FilePickerResultEvent):
@@ -63,9 +45,12 @@ def main(page: ft.Page):
     # Función para generar el archivo de audio
     def generate_audio(e):
         nonlocal generated_file
-        if len(text_field.value) > 200 or len(text_field.value) == 0:
-            # Mensaje de error
-            on_snack_bar(f"Error --> El texto debe tener caracteres a traducir y no pueden ser más de 200", "#db9fa0")
+        if len(text_field.value) > 200:
+            page.dialog = ft.AlertDialog(
+                title=ft.Text("Error"),
+                content=ft.Text("El texto no puede exceder los 200 caracteres."),
+            )
+            page.dialog.open = True
             page.update()
             return
 
@@ -79,16 +64,10 @@ def main(page: ft.Page):
             output_format=format_dropdown.value,  # Formato de salida
         )
 
-        # Mensaje de éxito
-        on_snack_bar(f"Exito --> Tu archivo de audio {generated_file} fue generado correctamente", "#90d4bf")
-        page.snack_bar.open = True
-        d.counter += 1
-
-        generate_button.visible = False 
+        result_label.value = f"Audio generado: {generated_file}"
+        result_label.visible = True
         play_button.visible = True
-        separador_label.visible = True
         save_button.visible = True
-        new_button.visible = True
         page.update()
 
     # Función para reproducir el audio generado
@@ -105,23 +84,15 @@ def main(page: ft.Page):
         speed_label.value = f"Velocidad: {round(speed_slider.value, 1)}"
         page.update()
 
-    def new_audio(e):
-        generate_button.visible = True
-        play_button.visible = False
-        separador_label.visible = False
-        save_button.visible = False
-        new_button.visible = False
-        page.update()
-
     # Configuración del FilePicker
     file_picker = ft.FilePicker(on_result=save_file_dialog_result)
     page.overlay.append(file_picker)
 
     # Controles de entrada
-    text_field = ft.TextField(label="Texto (máximo 200 caracteres)", max_length=200, color="#3c73ce")
+    text_field = ft.TextField(label="Texto (máximo 200 caracteres)", max_length=200, color="#669DF6")
     lang_dropdown = ft.Dropdown(
         label="Selecciona el idioma",
-        color="#3c73ce",
+        color="#669DF6",
         options=[
             ft.dropdown.Option("es", "Español"),
             ft.dropdown.Option("en", "Inglés"),
@@ -131,7 +102,7 @@ def main(page: ft.Page):
     )
     format_dropdown = ft.Dropdown(
         label="Formato de salida",
-        color="#3c73ce",
+        color="#669DF6",
         options=[
             ft.dropdown.Option("wav", "WAV"),
             ft.dropdown.Option("mp3", "MP3"),
@@ -154,9 +125,8 @@ def main(page: ft.Page):
     )
 
     text_title = ft.Text("Turnero-Speech", size=28)
-    volume_label = ft.Text(value="Volumen: 1.0",color="#3c73ce")
-    speed_label = ft.Text(value="Velocidad: 1.0",color="#3c73ce")
-    separador_label = ft.Text(value="  -->  ",color="#3c73ce", visible=False)
+    volume_label = ft.Text(value="Volumen: 1.0",color="#669DF6")
+    speed_label = ft.Text(value="Velocidad: 1.0",color="#669DF6")
 
     # Botones y resultados
     generate_button = ft.ElevatedButton("Generar", on_click=generate_audio)
@@ -166,7 +136,7 @@ def main(page: ft.Page):
         on_click=lambda e: file_picker.save_file(),
         visible=False,
     )
-    new_button = ft.ElevatedButton("Nuevo", on_click=new_audio, visible=False)
+    result_label = ft.Text(visible=False,color="#669DF6")
 
     # Layout
     page.add(
@@ -191,26 +161,15 @@ def main(page: ft.Page):
                         content =ft.Column(
                             alignment=ft.MainAxisAlignment.CENTER,
                             controls=[
-                                ## ft.Row(),
+                                ft.Row(),
                                 text_field,
                                 lang_dropdown,
                                 format_dropdown,
                                 ft.Row([volume_slider, volume_label]),
                                 ft.Row([speed_slider, speed_label]),
-                                ft.Row(
-                                    alignment=ft.MainAxisAlignment.CENTER,
-                                    controls=[                                                                    
-                                        generate_button, 
-                                    ]
-                                ),
-                                ft.Row(
-                                    alignment=ft.MainAxisAlignment.CENTER,
-                                    controls=[
-                                        play_button,
-                                        save_button,
-                                        new_button,
-                                    ]
-                                )
+                                generate_button,
+                                result_label,
+                                ft.Row([play_button,save_button,]),
                             ]
                         )                
                     )
@@ -219,9 +178,8 @@ def main(page: ft.Page):
                 vertical_alignment=ft.CrossAxisAlignment.CENTER,
             ),
             expand=True,
-            padding=ft.padding.all(0),
             image_src="images/Turnero-Speech-Background.jpg",  # Ruta a la imagen de fondo
-            image_fit=ft.ImageFit.COVER,  # Ajustar la imagen para cubrir toda la página
+            image_fit=ft.ImageFit.CONTAIN,  # Ajustar la imagen para cubrir toda la página
         )
     )
 
