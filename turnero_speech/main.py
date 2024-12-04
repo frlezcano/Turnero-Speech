@@ -50,7 +50,7 @@ def main(page: ft.Page):
         # page.snack_bar.padding = 20
         page.overlay.append(snack_bar)
         snack_bar.open = True
-        d.counter += 15
+        d.counter += 20
         page.update()
 
     # Función para manejar el evento del FilePicker
@@ -67,6 +67,7 @@ def main(page: ft.Page):
         if len(text_field.value) > 200 or len(text_field.value) == 0:
             # Mensaje de error
             on_snack_bar(f"Error --> El texto debe tener caracteres a traducir y no pueden ser más de 200", "#db9fa0")
+            text_field.focus()
             page.update()
             return
 
@@ -159,7 +160,7 @@ def main(page: ft.Page):
     play_button = ft.ElevatedButton("Reproducir", on_click=play_audio, visible=False)
     save_button = ft.ElevatedButton(
         "Guardar",
-        on_click=lambda e: file_picker.save_file(),
+        on_click=lambda e: file_picker.save_file(file_name=f"{generated_file}.{format_dropdown.value}"),
         visible=False,
     )
     new_button = ft.ElevatedButton("Nuevo", on_click=new_audio, visible=False)
@@ -194,7 +195,7 @@ def main(page: ft.Page):
                                     animation_duration=300,
                                     tabs=[
                                         ft.Tab(
-                                            text="...",
+                                            text="Texto a Audio",
                                             icon=ft.Icons.VOICE_CHAT,
                                             ## tab_content=ft.Icon(ft.Icons.SEARCH),
                                             content= ft.Column(
@@ -219,7 +220,7 @@ def main(page: ft.Page):
                                             )                
                                         ),
                                         ft.Tab(
-                                            text="...",
+                                            text="Preferencias",
                                             icon=ft.Icons.DISPLAY_SETTINGS_OUTLINED,
                                             content= ft.Column(
                                                 alignment=ft.MainAxisAlignment.CENTER,
