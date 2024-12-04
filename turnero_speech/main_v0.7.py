@@ -34,22 +34,21 @@ def text_to_voice(text, output, lang, volume, speed, output_format):
 
 def main(page: ft.Page):
     page.title = "Generador de Audio para Turnero"
-    page.window.width = 900
+    page.window.width = 850
     page.window.height = 510
-    page.window.resizable = False
+    ## page.window.resizable = False
 
     generated_file = None  # Variable para guardar la ruta del archivo generado
 
     # Función que muestra la snack_bar
     def on_snack_bar(snack_bar_message, snack_bar_color):
-        snack_bar = ft.SnackBar(
+        page.snack_bar = ft.SnackBar(
                             content=ft.Text(f"{snack_bar_message}"),
                             bgcolor = snack_bar_color,
                         )
         # page.behavior= "FLOATING"
         # page.snack_bar.padding = 20
-        page.overlay.append(snack_bar)
-        snack_bar.open = True
+        page.snack_bar.open = True
         d.counter += 15
         page.update()
 
@@ -82,6 +81,8 @@ def main(page: ft.Page):
 
         # Mensaje de éxito
         on_snack_bar(f"Exito --> Tu archivo de audio {generated_file} fue generado correctamente", "#90d4bf")
+        page.snack_bar.open = True
+        d.counter += 1
 
         generate_button.visible = False 
         play_button.visible = True
@@ -104,8 +105,6 @@ def main(page: ft.Page):
         page.update()
 
     def new_audio(e):
-        text_field.value = ""
-        text_field.focus()
         generate_button.visible = True
         play_button.visible = False
         save_button.visible = False
@@ -120,6 +119,7 @@ def main(page: ft.Page):
     text_field = ft.TextField(label="Texto (máximo 200 caracteres)", max_length=200)
     lang_dropdown = ft.Dropdown(
         label="Selecciona el idioma",
+        #color="#3c73ce",
         options=[
             ft.dropdown.Option("es", "Español"),
             ft.dropdown.Option("en", "Inglés"),
@@ -129,6 +129,7 @@ def main(page: ft.Page):
     )
     format_dropdown = ft.Dropdown(
         label="Formato de salida",
+        #color="#3c73ce",
         options=[
             ft.dropdown.Option("wav", "WAV"),
             ft.dropdown.Option("mp3", "MP3"),
@@ -165,12 +166,8 @@ def main(page: ft.Page):
     new_button = ft.ElevatedButton("Nuevo", on_click=new_audio, visible=False)
 
     # Layout
-    page.padding = 0
     page.add(
         ft.Container(
-            expand=True,
-            image_src="images/Turnero-Speech-Background.jpg",  # Ruta a la imagen de fondo
-            image_fit=ft.ImageFit.COVER,  # Ajustar la imagen para cubrir toda la página
             content=ft.Row(
                 [
                     ft.Container(     # Espacio vacío a la izquierda
@@ -185,60 +182,43 @@ def main(page: ft.Page):
                             ]
                         )                
                     ),
-
                     ft.Container(     # Espacio vacío a la derecha
                         expand=True,
                         padding=ft.padding.all(30),
-                        content =ft.Tabs(
-                                    selected_index=0,
-                                    animation_duration=300,
-                                    tabs=[
-                                        ft.Tab(
-                                            text="...",
-                                            icon=ft.Icons.VOICE_CHAT,
-                                            ## tab_content=ft.Icon(ft.Icons.SEARCH),
-                                            content= ft.Column(
-                                                alignment=ft.MainAxisAlignment.CENTER,
-                                                controls=[
-                                                    text_field,
-                                                    ft.Row(
-                                                        alignment=ft.MainAxisAlignment.CENTER,
-                                                        controls=[                                                                    
-                                                            generate_button, 
-                                                        ]
-                                                    ),
-                                                    ft.Row(
-                                                        alignment=ft.MainAxisAlignment.CENTER,
-                                                        controls=[
-                                                            play_button,
-                                                            save_button,
-                                                            new_button,
-                                                        ]
-                                                    )                                           
-                                                ]
-                                            )                
-                                        ),
-                                        ft.Tab(
-                                            text="...",
-                                            icon=ft.Icons.DISPLAY_SETTINGS_OUTLINED,
-                                            content= ft.Column(
-                                                alignment=ft.MainAxisAlignment.CENTER,
-                                                controls=[
-                                                    lang_dropdown,
-                                                    format_dropdown,
-                                                    ft.Row([volume_slider, volume_label]),
-                                                    ft.Row([speed_slider, speed_label]),
-                                                ]
-                                            ),
-                                        ),
-                                    ],
-                                    expand=1,
-                        ),
+                        content =ft.Column(
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            controls=[
+                                ## ft.Row(),
+                                text_field,
+                                lang_dropdown,
+                                format_dropdown,
+                                ft.Row([volume_slider, volume_label]),
+                                ft.Row([speed_slider, speed_label]),
+                                ft.Row(
+                                    alignment=ft.MainAxisAlignment.CENTER,
+                                    controls=[                                                                    
+                                        generate_button, 
+                                    ]
+                                ),
+                                ft.Row(
+                                    alignment=ft.MainAxisAlignment.CENTER,
+                                    controls=[
+                                        play_button,
+                                        save_button,
+                                        new_button,
+                                    ]
+                                )
+                            ]
+                        )                
                     )
                 ],
                 alignment=ft.MainAxisAlignment.END,
                 vertical_alignment=ft.CrossAxisAlignment.CENTER,
-            )
+            ),
+            expand=True,
+            padding=ft.padding.all(0),
+            image_src="images/Turnero-Speech-Background.jpg",  # Ruta a la imagen de fondo
+            image_fit=ft.ImageFit.COVER,  # Ajustar la imagen para cubrir toda la página
         )
     )
 
